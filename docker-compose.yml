@@ -17,7 +17,7 @@ services:
       - ./data/postgres:/docker-entrypoint-initdb.d
   svc-account:
     build:
-      dockerfile: Dockerfile-acc
+      dockerfile: ./account/Dockerfile-acc
     container_name: service-account
     restart: unless-stopped
     ports:
