@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14.5
+    container_name: postgres-assessment-march-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB?Variable not set}
+      POSTGRES_USER: ${POSTGRES_USER?Variable not set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?Variable not set}
+      TZ: "Asia/Jakarta"
+    ports:
+      - ${POSTGRES_DB_EXPOSE_PORT?Variable not set}:${POSTGRES_DB_PORT?Variable not set}
+    volumes:
+      - postgre_data:/var/lib/postgresql/data
+      - ./data/postgres:/docker-entrypoint-initdb.d
+  svc-account:
+    build:
+      dockerfile: Dockerfile-acc
+    container_name: service-account
+    restart: unless-stopped
+    ports:
+      - ${SERVICE_ACCOUNT_PORT?Variable not set}:${SERVICE_ACCOUNT_PORT?Variable not set}
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - TZ=Asia/Jakarta
+
+
+volumes:
+  postgre_data:
