@@ -1,18 +1,35 @@
-FROM golang:1.19-alpine as builder
-RUN apk --no-cache add ca-certificates git
-WORKDIR /usr/src/app
+FROM golang:1.22 as builder
 
-# # Fetch dependencies
-# COPY go.mod go.sum ./
-# RUN go mod download
+ENV HOME /app
+ENV CGO_ENABLED 0
+ENV GOOS linux
+ENV GOPROXY=direct
 
-# # Build
-# COPY . ./
-# RUN CGO_ENABLED=0 go build
+WORKDIR /app
 
-# # Create final image
-# FROM alpine
-# WORKDIR /
-# COPY --from=builder /build/myapp .
-# EXPOSE 8080
-# CMD ["./myapp"]
+
+RUN export PATH=$PATH:/usr/local/go/bin/sh
+
+COPY go.mod go.sum ./
+
+RUN go get gorm.io/gorm
+RUN go get gorm.io/driver/postgres
+
+RUN go mod tidy
+COPY . .
+
+RUN go build -a -installsuffix cgo -o main .
+
+FROM alpine:latest
+
+WORKDIR /root/
+
+COPY --from=builder /app/main .
+
+RUN apk add --no-cache inotify-tools
+
+EXPOSE 8080
+
+RUN chmod +x main
+
+CMD ["./main"]

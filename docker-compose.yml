@@ -17,13 +17,14 @@ services:
       - ./data/postgres:/docker-entrypoint-initdb.d
   svc-account:
     build:
+      context: .
       dockerfile: ./account/Dockerfile-acc
     container_name: service-account
     restart: unless-stopped
     ports:
       - ${SERVICE_ACCOUNT_PORT?Variable not set}:${SERVICE_ACCOUNT_PORT?Variable not set}
     volumes:
-      - .:/usr/src/app
+      - .:/app
     environment:
       - TZ=Asia/Jakarta
 
